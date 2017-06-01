@@ -74,7 +74,7 @@
 // max size of the WS Message Header
 #define WEBSOCKETS_MAX_HEADER_SIZE  (14)
 
-#if !defined(WEBSOCKETS_NETWORK_TYPE) 
+#if !defined(WEBSOCKETS_NETWORK_TYPE)
 // select Network type based
 #if defined(ESP8266) || defined(ESP31B)
 #define WEBSOCKETS_NETWORK_TYPE NETWORK_ESP8266
@@ -147,7 +147,7 @@
 #else
 #define WEBSOCKETS_STRING(var)  var
 #endif
-
+;
 typedef enum {
     WSC_NOT_CONNECTED,
     WSC_HEADER,
@@ -216,6 +216,7 @@ typedef struct {
         String cKey;        ///< client Sec-WebSocket-Key
         String cAccept;     ///< client Sec-WebSocket-Accept
         String cProtocol;   ///< client Sec-WebSocket-Protocol
+        String cOrigin;     ///< client Sec-WebSocket-Origin
         String cExtensions; ///< client Sec-WebSocket-Extensions
         uint16_t cVersion;  ///< client Sec-WebSocket-Version
 

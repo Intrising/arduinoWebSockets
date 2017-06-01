@@ -38,7 +38,7 @@ WebSocketsClient::~WebSocketsClient() {
 /**
  * calles to init the Websockets server
  */
-void WebSocketsClient::begin(const char *host, uint16_t port, const char * url, const char * protocol) {
+void WebSocketsClient::begin(const char *host, uint16_t port, const char * url, const char * protocol, const char * origin) {
     _host = host;
     _port = port;
 #if (WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP8266)
@@ -58,6 +58,7 @@ void WebSocketsClient::begin(const char *host, uint16_t port, const char * url, 
     _client.cIsWebsocket = true;
     _client.cKey = "";
     _client.cAccept = "";
+    _client.cOrigin = origin;
     _client.cProtocol = protocol;
     _client.cExtensions = "";
     _client.cVersion = 0;
@@ -76,8 +77,8 @@ void WebSocketsClient::begin(const char *host, uint16_t port, const char * url, 
 #endif
 }
 
-void WebSocketsClient::begin(String host, uint16_t port, String url, String protocol) {
-    begin(host.c_str(), port, url.c_str(), protocol.c_str());
+void WebSocketsClient::begin(String host, uint16_t port, String url, String protocol, String origin) {
+    begin(host.c_str(), port, url.c_str(), protocol.c_str(), origin.c_str());
 }
 
 #if (WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP8266)
@@ -378,7 +379,7 @@ bool WebSocketsClient::clientIsConnected(WSclient_t * client) {
 }
 #if (WEBSOCKETS_NETWORK_TYPE != NETWORK_ESP8266_ASYNC)
 /**
- * Handel incomming data from Client
+ * Handle incoming data from Client
  */
 void WebSocketsClient::handleClientData(void) {
     int len = _client.tcp->available();
@@ -465,9 +466,8 @@ void WebSocketsClient::sendHeader(WSclient_t * client) {
 	} else {
 		handshake += WEBSOCKETS_STRING("Connection: keep-alive\r\n");
 	}
-
-	handshake += WEBSOCKETS_STRING("Origin: file://\r\n"
-			"User-Agent: arduino-WebSocket-Client\r\n");
+  handshake += WEBSOCKETS_STRING("Origin: " + client->cOrigin + NEW_LINE);
+  handshake += WEBSOCKETS_STRING("User-Agent: arduino-WebSocket-Client\r\n");
 
 	if(client->base64Authorization.length() > 0) {
 		handshake += WEBSOCKETS_STRING("Authorization: Basic ");
@@ -530,8 +530,8 @@ void WebSocketsClient::handleHeader(WSclient_t * client, String * headerLine) {
             } else if(headerName.equalsIgnoreCase(WEBSOCKETS_STRING("Set-Cookie"))) {
                 if (headerValue.indexOf(WEBSOCKETS_STRING("HttpOnly")) > -1) {
                     client->cSessionId = headerValue.substring(headerValue.indexOf('=') + 1, headerValue.indexOf(";"));
-                } else { 
-                    client->cSessionId = headerValue.substring(headerValue.indexOf('=') + 1); 
+                } else {
+                    client->cSessionId = headerValue.substring(headerValue.indexOf('=') + 1);
                 }
             }
         } else {
